@@ -1,3 +1,14 @@
+/*
+
+Kode af Kristoffer N og Jeppe R
+     Bajer transport robot
+         Version 1.0
+
+          26/04/23
+*/
+
+
+
 // ir pins
 #define left_IR A0
 #define right_IR A1
