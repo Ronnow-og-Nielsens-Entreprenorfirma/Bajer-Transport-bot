@@ -74,6 +74,7 @@ void loop() {
   if (digitalRead(startKnap) == LOW) {
     start = true;
     tilbage = false;
+    data = false; // klar til at modtage data
   }
 
   // ir
