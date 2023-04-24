@@ -5,7 +5,7 @@ float duration, distance;
 
 #define EXE_INTERVAL 1000
 
-unsigned long lastExecutedMillis = 0;
+unsigned long lastExecutedHCSR0 = 0;
 
 void setup() {
   pinMode(trigPin, OUTPUT);
