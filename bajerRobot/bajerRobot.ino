@@ -21,13 +21,9 @@ bool data = false;
 // echo sensor pins og andre variabler til at syre HC-SR0
 #define trigPin 7
 #define echoPin 8
-float duration, distance;
-#define EXE_INTERVAL_ECHO 100
-unsigned long lastExecutedHCSR0 = 0;
-
-// start knap pin og tilstands boolean
-#define startKnap 2
-bool start = false;
+float varighed, distance;
+#define echo_delay 60
+unsigned long sidste_tid = 0;
 
 // pins til pwm output til hbro
 #define venstre_frem 10
@@ -52,6 +48,10 @@ bool tilbage = false;
 bool kopState[4] = { false, false, false, false };
 // Pins til Knapper for kopperne
 int kopPins[4] = { 3, 4, 19, 18 };
+
+// start knap pin og tilstands boolean
+#define startKnap 2
+bool start = false;
 
 // Setup køres engang på start af app
 void setup() {
@@ -99,9 +99,9 @@ void loop() {
   right_value = digitalRead(right_IR); // aflæs højre ir sensor data
 
   // echo
-  unsigned long currentMillis = millis(); // Definere tid nu
-  if (currentMillis - lastExecutedHCSR0 >= EXE_INTERVAL_ECHO) {  //  køre if statemen hvert 100ms
-    lastExecutedHCSR0 = currentMillis;  // gemmer sidste kørte tid
+  unsigned long nuvaerende_millis = millis(); // Definere tid nu
+  if (nuvaerende_millis - sidste_tid >= echo_delay) {  //  køre if statemen hvert 60ms
+    sidste_tid = nuvaerende_millis;  // gemmer sidste kørte tid
 
     digitalWrite(trigPin, LOW);  // sætter echo send pin til lav
     delayMicroseconds(2);        // venter 2 mikrosekunder
@@ -109,11 +109,11 @@ void loop() {
     delayMicroseconds(10);       // venter 10 mikrosekunder
     digitalWrite(trigPin, LOW);  // sætter echo send pin til lav igen
 
-    duration = pulseIn(echoPin, HIGH); // tager tiden det tager trig at reflektere tilbage til echo
-    distance = (duration * .0343) / 2; // omregner tiden til distance i cm
+    varighed = pulseIn(echoPin, HIGH); // tager tiden det tager trig at reflektere tilbage til echo
+    distance = (varighed * .0343) / 2; // omregner tiden til distance i cm
   }
 
-  if (distance < 20) {   // hvis distance er mindre end 20 cm stoppes motorne
+  if (distance < 30) {   // hvis distance er mindre end 30 cm stoppes motorne
     analogWrite(venstre_frem, 0);
     analogWrite(hojre_frem, 0);
     return; // går tilbage til start af void loop
@@ -148,16 +148,15 @@ void loop() {
   }
 
   if (end) {  // hvis enden er nået
-    //Send kopper
     if (!tilbage) { // hvis robotten ikke var på vej tilbage
-      for (int i = 0; i < 4; i++) { // så sendes byte array med hvilke kop holder der er kopper i til øltårn
-        HC12.write(kopState[i]);
-      }
-
       // modtager
       if (HC12.available() > 0) {  // hvis HC12 er klar
         data = HC12.read();  // læser data fra øltårn, hvis modtaget sættes data til true
       }
+
+      //Send kopper
+      sendBoolArray(sendBoolArray);
+
     }
 
     
@@ -172,9 +171,13 @@ void loop() {
 
       delay(1000);  // venter et sekund, så motor når at stå helt stille
 
-      if (tilbage) start = false; // hvis den er på vej tilbage så 
+      if (tilbage) start = false; // hvis den var på vej til bage så nulstill start variablen
       tilbage = true; // fortæller at den er på vej tilbage
       end = false;  // fortæller at slut frekvens er færdig, så den kan begynde at køre tilbage
     }
   }
+}
+
+void sendBoolArray(bool arr[4]) {
+  HC12.write((byte*)arr, sizeof(arr));
 }
