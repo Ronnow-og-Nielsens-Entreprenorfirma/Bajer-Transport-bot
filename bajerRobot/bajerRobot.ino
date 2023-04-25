@@ -162,8 +162,6 @@ void loop() {
 
     
     if (data) {  // hvis signal fra øltårn er modtaget
-      tilbage = true; // fortæller at den er på vej tilbage
-
       delay(3000); // venter 3 sekunder hvis nu øltårnet drypper 
       while (digitalRead(left_IR) == LOW) { // rotere om sig selv indtil venstre ir sensor opdager noget
         analogWrite(hojre_frem, 80);
@@ -173,6 +171,9 @@ void loop() {
       analogWrite(venstre_tilbage, 0);
 
       delay(1000);  // venter et sekund, så motor når at stå helt stille
+
+      if (tilbage) start = false; // hvis den er på vej tilbage så 
+      tilbage = true; // fortæller at den er på vej tilbage
       end = false;  // fortæller at slut frekvens er færdig, så den kan begynde at køre tilbage
     }
   }
