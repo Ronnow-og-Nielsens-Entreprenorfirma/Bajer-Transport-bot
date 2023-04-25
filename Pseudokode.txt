@@ -1,0 +1,101 @@
+Importere SoftwareSerial.h bibliotek
+
+Definere Tx og Rx pin til HC-12
+Definere Booleans til at holde styr på om data er modtaget/sendt
+
+Definere IR sensor pins
+
+Definere pis til HC-SR0 echo sensor
+Definere variabler til beregning af distance
+Definere variabler til styring af delay for echo sensor
+
+Definere PWM output pins til hbro
+
+Definere duty cycle størrelse for motor hastighed
+
+Definere start tilstand for ir sensor værdi
+
+Definere start, ende og tilbage booleans
+
+Definere kop knappernes pins
+Definere kop knappernes start tilstand
+
+Definere start knap pin
+
+
+Setup funktion
+            set pin mode for kop knappernes pins som INPUT_PULLUP
+            set pin mode for start knap pin som INPUT_PULLUP
+            set pin mode for ir-sensorerne pins som INPUT
+            set pin mode for echo-sensorer trig pin som OUTPUT
+            og sæt echo pin som INPUT
+            set pin mode for alle PWM pins som OUTPUT
+            initialisere HC12 trådløst kommunikationsmodul
+
+Loop funktion
+            hvis starter knap ikke er trykket
+                        Tjek hvilke knap kopper er trykket
+
+            Hvis start knap er trykket
+                        sæt start til true, så robotten starter
+                        nulstil data og tilbage boolean
+
+            Aflæs venstre og højre ir-sensor og gem det i hver deres boolean
+
+            gem den nuværende tid i millis
+            hvis den nuværende tid minus tiden sidst echo sensor kørte er mindre end 60 minus
+                        gem tiden
+
+                        sæt trig pin lav
+                        vent 2 mikrosekunder
+                        sæt trig pin høj
+                        vent 10 mikrosekunder
+                        sæt trig pin lav
+
+                        gem tiden det tog echo pin at gå fra lav til høj
+                        tag den tid og multiplicere det med 0,0343 og dividere det med 2
+                        gem dette som distance i cm
+            
+            hvis distance er under 30 cm
+                        stop begge motorer
+            
+            Hvis enden ikke er nået og start knappen er trykket
+                        tag værdi af venstre ir sensor og skub binær værdi en bit til venstre
+                        og så kombinere det med værdien for højre ir sensor
+
+                        hvis kombination er 11
+                                    stop begge motorer og sæt end til true
+
+                        hvis kombination er 10
+                                    stop højre motor
+                                    lig 50 til venstre motors duty cycle
+
+                        hvis kombination er 01
+                                    stop højre venstre
+                                    lig 50 til højre motors duty cycle                                    
+
+                        hvis kombination er 00
+                                    begge motor kører
+            
+            hvis end er true, så er enden nået
+                        hvis robotten ikke var på vej tilbage
+                                    hvis der ikke er blevet sendt data
+                                                send hvilke kop holder der er kopper i
+
+                                    hvis der kommer data fra øltårn
+                                                sæt data til true, så robotten kan køre tilbage
+                        
+                        hvis data er true så kan robotten starte med at køre tilbage
+                                    vent 3 sekunder hvis nu øl tårnet drypper 
+
+                                    Så længe venstre ir sensor er lav
+                                                kør højre motor frem
+                                                kør venstre motor tilbage
+
+                                    stop begge motorer
+                                    vent i 1 sekund så motorer når at stå helt stille
+                        
+                        hvis robotten var på vej tilbage, så nulstil start variablen
+                        sæt tilbage til true
+                        sæt end til falsk, så den kan begynde at køre tilbage
+                        nulstil sendt, så der kan sendes data igen
