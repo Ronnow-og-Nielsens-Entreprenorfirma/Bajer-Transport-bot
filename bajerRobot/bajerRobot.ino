@@ -13,6 +13,7 @@
 // HC12 pins og data ind boolean
 SoftwareSerial HC12(12, 11);  // TX, RX pins for HC-12
 bool data = false;
+bool sendt = false;
 
 // ir sensor pins
 #define left_IR A0
@@ -149,14 +150,13 @@ void loop() {
 
   if (end) {  // hvis enden er nået
     if (!tilbage) { // hvis robotten ikke var på vej tilbage
+      //Send kopper
+      if (!sendt) sendBoolArray(sendBoolArray);
+
       // modtager
       if (HC12.available() > 0) {  // hvis HC12 er klar
         data = HC12.read();  // læser data fra øltårn, hvis modtaget sættes data til true
       }
-
-      //Send kopper
-      sendBoolArray(sendBoolArray);
-
     }
 
     
@@ -174,10 +174,13 @@ void loop() {
       if (tilbage) start = false; // hvis den var på vej til bage så nulstill start variablen
       tilbage = true; // fortæller at den er på vej tilbage
       end = false;  // fortæller at slut frekvens er færdig, så den kan begynde at køre tilbage
+      sendt = false; // nulstiller sendt værdien
     }
   }
 }
 
+// funktion sender bool array til øltårn
 void sendBoolArray(bool arr[4]) {
   HC12.write((byte*)arr, sizeof(arr));
+  sendt = true;
 }
