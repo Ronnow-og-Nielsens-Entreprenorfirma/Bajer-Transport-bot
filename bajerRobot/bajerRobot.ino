@@ -171,7 +171,7 @@ void loop() {
 
       delay(1000);  // venter et sekund, så motor når at stå helt stille
 
-      if (tilbage) start = false; // hvis den var på vej til bage så nulstill start variablen
+      if (tilbage) start = false; // hvis den var på vej tilbage så nulstill start variablen
       tilbage = true; // fortæller at den er på vej tilbage
       end = false;  // fortæller at slut frekvens er færdig, så den kan begynde at køre tilbage
       sendt = false; // nulstiller sendt værdien
